@@ -35,6 +35,7 @@ import re
 import struct
 from decimal import Decimal
 from hashlib import sha256
+import base64
 
 import lib.util as util
 from lib.hash import Base58, hash160, double_sha256, hash_to_str
@@ -328,9 +329,11 @@ class EquihashMixin(object):
             'version': version,
             'prev_block_hash': hash_to_str(header[4:36]),
             'merkle_root': hash_to_str(header[36:68]),
+            'hash_reserved': hash_to_str(header[68:100]),
             'timestamp': timestamp,
             'bits': bits,
             'nonce': hash_to_str(header[108:140]),
+            'n_solution': base64.b64encode(lib_tx.Deserializer(header, start=140)._read_varbytes()).decode('utf8')
         }
 
     @classmethod
