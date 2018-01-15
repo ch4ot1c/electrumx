@@ -900,6 +900,7 @@ class Zclassic(EquihashMixin, Coin):
     TX_PER_BLOCK = 5
     RPC_PORT = 8023
     REORG_LIMIT = 800
+    CHUNK_SIZE = 200
 
 class Komodo(KomodoMixin, EquihashMixin, Coin):
     NAME = "Komodo"
