@@ -902,6 +902,23 @@ class Zclassic(EquihashMixin, Coin):
     REORG_LIMIT = 800
     CHUNK_SIZE = 200
 
+class ZclassicTestnet(EquihashMixin, Coin):
+    NAME = "Zclassic"
+    SHORTNAME = "ZCL"
+    NET = "testnet"
+    P2PKH_VERBYTE = bytes.fromhex("1D25")
+    P2SH_VERBYTES = [bytes.fromhex("1CBA")]
+    WIF_BYTE = bytes.fromhex("EF")
+    GENESIS_HASH         = ( '03e1c4bb705c871bf9bfda3e74b7f8f8'
+                             '6bff267993c215a89d5795e3708e5e1f')
+    DESERIALIZER = lib_tx.DeserializerZcash
+    TX_COUNT = 329196
+    TX_COUNT_HEIGHT = 68379
+    TX_PER_BLOCK = 5
+    RPC_PORT = 18023
+    REORG_LIMIT = 800
+    CHUNK_SIZE = 200
+
 class Komodo(KomodoMixin, EquihashMixin, Coin):
     NAME = "Komodo"
     SHORTNAME = "KMD"
