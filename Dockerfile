@@ -20,12 +20,12 @@ RUN pip install aiohttp==1.0.5
 RUN pip install x11_hash==1.4
 RUN pip install plyvel==0.9
 
-RUN chown -R zcluser:zcluser /home/zcluser/zcl_electrum_db
+COPY run_electrumx_docker.sh /home/zcluser/run_electrumx_docker.sh
+RUN chown -R zcluser:zcluser /home/zcluser/zcl_electrum_db /home/zcluser/run_electrumx_docker.sh
+RUN chmod 755 /home/zcluser/run_electrumx_docker.sh
 
 USER zcluser
 RUN /home/zcluser/zclassic/zcutil/fetch-params.sh
-COPY --chown=zcluser:zcluser run_electrumx_docker.sh /home/zcluser/run_electrumx_docker.sh
-RUN chmod 755 /home/zcluser/run_electrumx_docker.sh
 RUN git clone https://github.com/BTCP-community/electrumx.git
 RUN wget -q https://github.com/z-classic/zclassic/releases/download/Config/zclassic.conf
 RUN sed -ie '/^rpcport=8232/a txindex=1' zclassic.conf
