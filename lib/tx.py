@@ -34,6 +34,8 @@ from lib.hash import double_sha256, hash_to_str
 from lib.util import (cachedproperty, unpack_int32_from, unpack_int64_from,
                       unpack_uint16_from, unpack_uint32_from,
                       unpack_uint64_from)
+from .joinsplit import deser_vector_with_len, JSDescription, deser_uint256
+import io
 
 
 class Tx(namedtuple("Tx", "version inputs outputs locktime")):
@@ -306,20 +308,40 @@ class TxJoinSplit(namedtuple("Tx", "version inputs outputs locktime")):
         return self.inputs[0].is_coinbase if len(self.inputs) > 0 else False
 
 
+class TxJoinSplitShielded(namedtuple("Tx", "version inputs outputs locktime joinSplits joinSplitPubKey joinSplitSig")):
+    '''Class representing a JoinSplit transaction.'''
+
+    @cachedproperty
+    def is_coinbase(self):
+        return self.inputs[0].is_coinbase if len(self.inputs) > 0 else False
+
+
 class DeserializerZcash(DeserializerEquihash):
     def read_tx(self):
-        base_tx =  TxJoinSplit(
-            self._read_le_int32(),  # version
-            self._read_inputs(),    # inputs
-            self._read_outputs(),   # outputs
-            self._read_le_uint32()  # locktime
+        version = self._read_le_int32()
+        inputs = self._read_inputs()
+        outputs = self._read_outputs()
+        locktime = self._read_le_uint32()
+        joinSplits = []
+        joinSplitPubKey = None
+        joinSplitSig = None
+        if version >= 2:
+            joinSplit_size = self._read_varint()
+            if joinSplit_size > 0:
+                joinSplit_stream = io.BytesIO(self._read_nbytes(joinSplit_size*1802))
+                joinSplits = deser_vector_with_len(joinSplit_stream, JSDescription, joinSplit_size)
+                joinSplitPubKey = deser_uint256(io.BytesIO(self._read_nbytes(32)))
+                joinSplitSig = self._read_nbytes(64)
+
+        base_tx = TxJoinSplitShielded(
+            version,
+            inputs,
+            outputs,
+            locktime,
+            joinSplits,
+            joinSplitPubKey,
+            joinSplitSig,
         )
-        if base_tx.version >= 2:
-            joinsplit_size = self._read_varint()
-            if joinsplit_size > 0:
-                self.cursor += joinsplit_size * 1802 # JSDescription
-                self.cursor += 32 # joinSplitPubKey
-                self.cursor += 64 # joinSplitSig
         return base_tx
 
 
